@@ -67,8 +67,9 @@ def identity(arg):
 def register_pipelines():
     pipeline = Pipeline(
         [
-            node(identity, ["input"], ["intermediate"], name="node0"),
+            node(identity, ["input"], ["intermediate"], name="node0", tags=["tag0"]),
             node(identity, ["intermediate"], ["output"], name="node1"),
+            node(identity, ["intermediate"], ["output2"], name="node2", tags=["tag0"]),
         ],
         tags="pipeline0",
     )
@@ -104,5 +105,4 @@ def metadata(kedro_project):
         kedro_init_version=kedro_version,
         project_path=project_path,
         tools=["None"],
-        example_pipeline="No",
     )

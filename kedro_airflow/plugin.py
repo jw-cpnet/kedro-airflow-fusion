@@ -22,6 +22,9 @@ If not set, the '__default__' pipeline is used. This argument supports
 passing multiple values using `--pipeline [p1] --pipeline [p2]`.
 Use the `--all` flag to convert all registered pipelines at once."""
 ALL_ARG_HELP = """Convert all registered pipelines at once."""
+TAGS_ARG_HELP = """Tags to be used for filtering pipeline nodes.
+Multiple tags are supported. Use the following format:
+`--tags tag1,tag2`."""
 
 
 @click.group(name="Kedro-Airflow")
@@ -101,6 +104,13 @@ def _get_pipeline_config(config_airflow: dict, params: dict, pipeline_name: str)
     help="The template file for the generated Airflow dags",
 )
 @click.option(
+    "--tags",
+    type=str,
+    default="",
+    help=TAGS_ARG_HELP,
+    callback=lambda ctx, param, value: value.split(",") if value else [],
+)
+@click.option(
     "--params",
     type=click.UNPROCESSED,
     default="",
@@ -114,6 +124,7 @@ def create(  # noqa: PLR0913
     env,
     target_path,
     jinja_file,
+    tags,
     params,
     convert_all: bool,
 ):
@@ -165,6 +176,8 @@ def create(  # noqa: PLR0913
             else f"{package_name}_{name}_dag.py"
         )
 
+        if tags:
+            pipeline = pipeline.only_nodes_with_tags(*tags)
         dependencies = defaultdict(list)
         for node, parent_nodes in pipeline.node_dependencies.items():
             for parent in parent_nodes:
