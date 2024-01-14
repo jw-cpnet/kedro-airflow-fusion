@@ -1,4 +1,5 @@
 from __future__ import annotations
+import os
 from datetime import datetime, timedelta
 from pathlib import Path
 
@@ -9,6 +10,8 @@ from airflow.utils.decorators import apply_defaults
 from kedro.framework.session import KedroSession
 from kedro.framework.project import configure_project
 
+
+os.environ["KEDRO_ENV"] = "{{ env }}"
 
 class KedroOperator(BaseOperator):
     @apply_defaults
@@ -38,14 +41,14 @@ class KedroOperator(BaseOperator):
 # Kedro settings required to run your pipeline
 env = "{{ env }}"
 pipeline_name = "{{ pipeline_name }}"
-project_path = Path.cwd()
-package_name = "{{ package_name }}"
+project_path = "app/fusion"
+package_name = "fusion"
 
 # Using a DAG context manager, you don't have to specify the dag property of each task
 with DAG(
-    dag_id="{{ dag_name | safe | slugify }}",
-    start_date=datetime({{ start_date | default([2023, 1, 1]) | join(",")}}),
-    max_active_runs={{ max_active_runs | default(3) }},
+    dag_id="{{ dag_name | safe | slugify }}-{{ pipeline_name | safe | slugify }}-{{ env | safe | slugify }}",
+    start_date=datetime({{ start_date | default([2024, 1, 1]) | join(",")}}),
+    max_active_runs={{ max_active_runs | default(1) }},
     # https://airflow.apache.org/docs/stable/scheduler.html#dag-runs
     schedule_interval="{{ schedule_interval | default('@once') }}",
     catchup={{ catchup | default(False) }},
