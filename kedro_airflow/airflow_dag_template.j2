@@ -34,6 +34,7 @@ class KedroOperator(BaseOperator):
     def execute(self, context):
         configure_project(self.package_name)
         with KedroSession.create(project_path=f"{self.package_name}/{self.pipeline_name}",
+                                 conf_source=f"/opt/airflow/{self.package_name}/{self.pipeline_name}/conf",
                                  env=self.env) as session:
             session.run(self.pipeline_name, node_names=[self.node_name])
 
