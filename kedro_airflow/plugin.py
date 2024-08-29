@@ -1,4 +1,4 @@
-""" Kedro plugin for running a project with Airflow """
+"""Kedro plugin for running a project with Airflow"""
 
 from __future__ import annotations
 
@@ -129,6 +129,12 @@ def _get_pipeline_config(config_airflow: dict, params: dict, pipeline_name: str)
     callback=split_string,
 )
 @click.option(
+    "--ns",
+    type=str,
+    default="",
+    help="Namespace for the Airflow DAGs",
+)
+@click.option(
     "--params",
     type=click.UNPROCESSED,
     default="",
@@ -152,6 +158,7 @@ def create(  # noqa: PLR0913, PLR0912
     tags,
     params,
     conf_source,
+    ns,
     convert_all: bool,
 ):
     """Create an Airflow DAG for a project"""
@@ -208,6 +215,9 @@ def create(  # noqa: PLR0913, PLR0912
             dag_name += f"_{name}"
         dag_name += "_dag.py"
         dag_filename = dags_folder / dag_name
+
+        if ns:
+            pipeline = pipeline.only_nodes_with_namespace(ns)
 
         if tags:
             pipeline = pipeline.only_nodes_with_tags(*tags)  # noqa: PLW2901
