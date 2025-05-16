@@ -63,7 +63,7 @@ with DAG(
         retries={{ retries | default(1) }},
         retry_delay=timedelta(minutes={{ retry_delay | default(5) }})
     ),
-    tags=[{{ pipeline_name }}],
+    tags=["{{ pipeline_name }}"],
 ) as dag:
     tasks = {
     {% for node_name, node_list in nodes.items() %}        "{{ node_name | safe | slugify }}": KedroOperator(
