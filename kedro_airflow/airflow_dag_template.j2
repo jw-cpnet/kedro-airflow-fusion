@@ -48,12 +48,12 @@ package_name = "fusion"
 # Using a DAG context manager, you don't have to specify the dag property of each task
 with DAG(
     dag_id="{{ dag_name | safe | slugify }}-{{ pipeline_name | safe | slugify }}-{{ env | safe | slugify }}",
-    start_date=datetime({{ start_date["year"] }}, {{ start_date["month"] }}, {{ start_date["day"] }}),
-    max_active_runs={{ max_active_runs }},
+    start_date=datetime({{ start_date | default([2024, 1, 1]) | join(',') }}),
+    max_active_runs={{ max_active_runs | default(1) }},
     # https://airflow.apache.org/docs/stable/scheduler.html#dag-runs
     # https://airflow.apache.org/docs/apache-airflow/stable/core-concepts/dags.html#scheduling
-    schedule="{{ schedule_interval }}",
-    catchup={{ catchup }},
+    schedule="{{ schedule_interval | default('@once') }}",
+    catchup={{ catchup | default(False) }},
     # Default settings applied to all tasks
     default_args=dict(
         owner="{{ owner | default('airflow') }}",
