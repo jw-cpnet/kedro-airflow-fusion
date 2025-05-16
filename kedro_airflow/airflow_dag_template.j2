@@ -48,11 +48,12 @@ package_name = "fusion"
 # Using a DAG context manager, you don't have to specify the dag property of each task
 with DAG(
     dag_id="{{ dag_name | safe | slugify }}-{{ pipeline_name | safe | slugify }}-{{ env | safe | slugify }}",
-    start_date=datetime({{ start_date | default([2024, 1, 1]) | join(",")}}),
-    max_active_runs={{ max_active_runs | default(1) }},
+    start_date=datetime({{ start_date["year"] }}, {{ start_date["month"] }}, {{ start_date["day"] }}}),
+    max_active_runs={{ max_active_runs }},
     # https://airflow.apache.org/docs/stable/scheduler.html#dag-runs
-    schedule_interval="{{ schedule_interval | default('@once') }}",
-    catchup={{ catchup | default(False) }},
+    # https://airflow.apache.org/docs/apache-airflow/stable/core-concepts/dags.html#scheduling
+    schedule="{{ schedule_interval }}",
+    catchup={{ catchup }},
     # Default settings applied to all tasks
     default_args=dict(
         owner="{{ owner | default('airflow') }}",
@@ -61,7 +62,8 @@ with DAG(
         email_on_retry={{ email_on_retry | default(False) }},
         retries={{ retries | default(1) }},
         retry_delay=timedelta(minutes={{ retry_delay | default(5) }})
-    )
+    ),
+    tags=[{{ pipeline_name }}],
 ) as dag:
     tasks = {
     {% for node_name, node_list in nodes.items() %}        "{{ node_name | safe | slugify }}": KedroOperator(
