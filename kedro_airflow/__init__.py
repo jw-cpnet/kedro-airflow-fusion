@@ -1,3 +1,3 @@
 """Kedro plugin for running a project with Airflow."""
 
-__version__ = "0.10.3"
+__version__ = "0.10.4"
