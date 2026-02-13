@@ -3,6 +3,7 @@ import os
 from datetime import datetime, timedelta
 from pathlib import Path
 
+import pendulum
 from airflow import DAG
 from airflow.models import BaseOperator
 
@@ -48,7 +49,11 @@ package_name = "fusion"
 # Using a DAG context manager, you don't have to specify the dag property of each task
 with DAG(
     dag_id="{{ dag_name | safe | slugify }}-{{ pipeline_name | safe | slugify }}-{{ env | safe | slugify }}",
+    {% if timezone is defined and timezone -%}
+    start_date=datetime({{ start_date | default([2024, 1, 1]) | join(',') }}, tzinfo=pendulum.timezone("{{ timezone }}")),
+    {%- else -%}
     start_date=datetime({{ start_date | default([2024, 1, 1]) | join(',') }}),
+    {%- endif %}
     max_active_runs={{ max_active_runs | default(1) }},
     # https://airflow.apache.org/docs/stable/scheduler.html#dag-runs
     # https://airflow.apache.org/docs/apache-airflow/stable/core-concepts/dags.html#scheduling
